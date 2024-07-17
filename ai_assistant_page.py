@@ -10,6 +10,7 @@ import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
 from io import BytesIO
+from audio_recorder_streamlit import audio_recorder
 
 # Load environment variables from .env file
 load_dotenv()
