@@ -6,9 +6,10 @@ from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import speech_recognition as sr
 from gtts import gTTS
-import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
+import threading
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -201,7 +202,6 @@ def ai_assistant_page():
     with col2:
         speak_button = st.button("Speak")
 
-    # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
         key="speech-to-text",
         mode=WebRtcMode.SENDONLY,
@@ -212,10 +212,18 @@ def ai_assistant_page():
             }
         ),
         sendback_audio=False,
-        audio_receiver_size=1024,
     )
 
-    if webrtc_ctx.audio_receiver:
+    def audio_processing_callback(frame: av.AudioFrame):
+        audio_data = frame.to_ndarray()
+        # Do something with the audio data
+        return av.AudioFrame.from_ndarray(audio_data, layout="mono")
+
+    webrtc_ctx.processor = audio_processing_callback
+
+    if speak_button:
+        # Wait for a few seconds to capture the audio
+        time.sleep(3)
         audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
