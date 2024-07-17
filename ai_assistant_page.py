@@ -114,6 +114,9 @@ def ai_assistant_page():
     st.title('AI Assistant')
     st.write("Your personal insurance and finance expert")
 
+    if "is_recording" not in st.session_state:
+        st.session_state.is_recording = False
+
     # Custom CSS for chat containers and buttons
     st.markdown("""
     <style>
@@ -200,8 +203,9 @@ def ai_assistant_page():
     with col1:
         send_button = st.button("Send")
     with col2:
-        speak_button = st.button("Speak")
-
+        speak_button = st.button("Speak" if not st.session_state.is_recording else "Stop Speaking")
+    
+    # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
         key="speech-to-text",
         mode=WebRtcMode.SENDONLY,
@@ -212,18 +216,15 @@ def ai_assistant_page():
             }
         ),
         sendback_audio=False,
+        audio_receiver_size=1024,
     )
-
-    def audio_processing_callback(frame: av.AudioFrame):
-        audio_data = frame.to_ndarray()
-        # Do something with the audio data
-        return av.AudioFrame.from_ndarray(audio_data, layout="mono")
-
-    webrtc_ctx.processor = audio_processing_callback
-
+    
+    # Toggle recording status when the speak/stop button is clicked
     if speak_button:
-        # Wait for a few seconds to capture the audio
-        time.sleep(3)
+        st.session_state.is_recording = not st.session_state.is_recording
+    
+    # Process audio frames if recording has stopped
+    if webrtc_ctx.audio_receiver and not st.session_state.is_recording:
         audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
@@ -235,7 +236,7 @@ def ai_assistant_page():
                 st.experimental_rerun()
             else:
                 st.error("Failed to transcribe audio. Please try again.")
-
+    
     if send_button and user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
         response = generate_insurance_assistant_response(user_input, client, fine_tuning_data, fitness_discount_data)
