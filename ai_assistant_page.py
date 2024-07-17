@@ -162,10 +162,10 @@ def ai_assistant_page():
         background-color: #1e3d5a;
         border-radius: 10px;
         padding: 10px;
-        margin: 10px 0.
+        margin: 10px 0;
     }
     .chat-text {
-        color: #ffffff.
+        color: #ffffff;
     }
     .stButton > button {
         width: 100%;
@@ -175,14 +175,14 @@ def ai_assistant_page():
         border: none;
         border-radius: 5px;
         font-size: 16px;
-        cursor: pointer.
+        cursor: pointer;
     }
     .stButton > button:hover {
-        background-color: #45a049.
+        background-color: #45a049;
     }
     .button-container {
         display: flex;
-        justify-content: space-between.
+        justify-content: space-between;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -207,28 +207,19 @@ def ai_assistant_page():
 
         st.button('Clear Chat History', on_click=clear_chat_history)
 
-        # Get available input devices
-        p = pyaudio.PyAudio()
-        input_devices = []
-        for i in range(p.get_device_count()):
-            dev = p.get_device_info_by_index(i)
-            if dev.get('maxInputChannels') > 0:
-                input_devices.append(dev)
+    # Get available input devices
+    p = pyaudio.PyAudio()
+    input_devices = []
+    for i in range(p.get_device_count()):
+        dev = p.get_device_info_by_index(i)
+        if dev.get('maxInputChannels') > 0:
+            input_devices.append(dev)
 
-        # Device selection
-        device_names = [f"{dev['index']}: {dev['name']}" for dev in input_devices]
-        st.write("Available devices:", device_names)
-        selected_device = st.selectbox("Select input device:", device_names)
-        
-        # Debugging print
-        st.write(f"Selected device (raw): {selected_device}")
-
-        try:
-            selected_device_index = int(selected_device.split(':')[0])
-            st.write(f"Selected device index: {selected_device_index}")
-        except ValueError:
-            st.error("Failed to parse the selected device index. Please try again.")
-            return
+    if input_devices:
+        selected_device_index = input_devices[0]['index']
+    else:
+        st.error("No input devices found.")
+        return
 
     # Initialize session state for messages
     if "messages" not in st.session_state:
