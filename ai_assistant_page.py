@@ -218,7 +218,14 @@ def ai_assistant_page():
         # Device selection
         device_names = [f"{dev['index']}: {dev['name']}" for dev in input_devices]
         selected_device = st.selectbox("Select input device:", device_names)
-        selected_device_index = int(selected_device.split(':')[0])
+        
+        # Debugging print
+        st.write(f"Selected device: {selected_device}")
+
+        try:
+            selected_device_index = int(selected_device.split(':')[0])
+        except ValueError:
+            st.error("Failed to parse the selected device index. Please try again.")
 
     # Initialize session state for messages
     if "messages" not in st.session_state:
@@ -271,4 +278,4 @@ def ai_assistant_page():
 
 # Run the app
 if __name__ == "__main__":
-    ai_assist9ant_page()
+    ai_assistant_page()
