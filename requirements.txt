@@ -34,5 +34,5 @@ plotly-express
 scipy
 streamlit-extras
 decorator
-speech_recognition
+SpeechRecognition
 deprecation
