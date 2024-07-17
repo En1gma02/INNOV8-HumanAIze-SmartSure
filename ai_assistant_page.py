@@ -216,22 +216,8 @@ def ai_assistant_page():
     with col2:
         speak_button = st.button("Speak")
 
-    col3, col4= st.columns([0.8, 0.2])
-    st.markdown(
-    """
-    <style>
-    button {
-        height: auto;
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-    }
-    </style>
-    """,
-        unsafe_allow_html=True,
-    )
-    
-    with col3:
-        uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
+  
+    uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
 
     if uploaded_file is not None and not st.session_state.file_processed:
         try:
@@ -257,9 +243,8 @@ def ai_assistant_page():
     else:
         st.session_state.file_processed = False
 
-    with col4:
-        if st.button("New audio"):
-            st.session_state.file_processed = False
+    if st.button("New audio"):
+        st.session_state.file_processed = False
             
     # Add this text below the buttons
     st.write("Facing issues recording? Upload an audio file instead.")
