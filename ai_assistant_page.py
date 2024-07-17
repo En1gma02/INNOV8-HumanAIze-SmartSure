@@ -125,6 +125,9 @@ def ai_assistant_page():
     st.title('AI Assistant')
     st.write("Your personal insurance and finance expert")
 
+    if "file_processed" not in st.session_state:
+        st.session_state.file_processed = False
+    
     # Custom CSS for chat containers and buttons
     st.markdown("""
     <style>
@@ -217,7 +220,7 @@ def ai_assistant_page():
     # Add this text below the buttons
     st.write("Facing issues recording? Upload an audio file instead.")
 
-    if uploaded_file is not None:
+    if uploaded_file is not None and not st.session_state.file_processed:
         try:
             # Display audio player
             st.audio(uploaded_file)
@@ -233,12 +236,17 @@ def ai_assistant_page():
                 st.session_state.messages.append({"role": "user", "content": transcribed_text})
                 response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
                 st.session_state.messages.append({"role": "assistant", "content": response})
-                st.experimental_rerun()
+                st.session_state.file_processed = True
             else:
                 st.error("Failed to transcribe audio. Please try again with a different file.")
         except Exception as e:
             st.error(f"Error processing audio file: {str(e)}")
-        
+    else:
+        st.session_state.file_processed = False
+
+    if st.button("Process new audio file"):
+        st.session_state.file_processed = False
+    
     # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
         key="speech-to-text",
