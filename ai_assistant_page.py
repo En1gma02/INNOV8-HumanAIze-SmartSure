@@ -6,10 +6,9 @@ from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import speech_recognition as sr
 from gtts import gTTS
+import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
-import threading
-import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -116,7 +115,7 @@ def ai_assistant_page():
 
     if "is_recording" not in st.session_state:
         st.session_state.is_recording = False
-
+    
     # Custom CSS for chat containers and buttons
     st.markdown("""
     <style>
@@ -225,7 +224,7 @@ def ai_assistant_page():
     
     # Process audio frames if recording has stopped
     if webrtc_ctx.audio_receiver and not st.session_state.is_recording:
-        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=10)
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
             transcribed_text = transcribe_audio(audio_data)
