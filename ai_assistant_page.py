@@ -217,6 +217,19 @@ def ai_assistant_page():
         speak_button = st.button("Speak")
 
     col3, col4= st.columns([0.8, 0.2])
+    st.markdown(
+    """
+    <style>
+    button {
+        height: auto;
+        padding-top: 10px !important;
+        padding-bottom: 10px !important;
+    }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+    
     with col3:
         uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
 
