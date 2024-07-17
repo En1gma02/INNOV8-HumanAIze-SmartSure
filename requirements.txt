@@ -37,4 +37,3 @@ deprecation
 pyttsx3==2.90
 pyaudio==0.2.14
 streamlit-webrtc
-time
