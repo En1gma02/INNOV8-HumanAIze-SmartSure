@@ -225,7 +225,7 @@ def ai_assistant_page():
     
     # Process audio frames if recording has stopped
     if webrtc_ctx.audio_receiver and not st.session_state.is_recording:
-        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=10)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
             transcribed_text = transcribe_audio(audio_data)
