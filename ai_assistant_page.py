@@ -218,7 +218,7 @@ def ai_assistant_page():
 
     col3, col4= st.columns([0.8, 0.2])
     with col3:
-        uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
+        uploaded_file = st.file_uploader(type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
 
     if uploaded_file is not None and not st.session_state.file_processed:
         try:
@@ -245,7 +245,7 @@ def ai_assistant_page():
         st.session_state.file_processed = False
 
     with col4:
-        if st.button("Process new audio file"):
+        if st.button("New audio"):
             st.session_state.file_processed = False
             
     # Add this text below the buttons
