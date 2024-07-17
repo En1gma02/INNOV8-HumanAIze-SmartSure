@@ -202,12 +202,10 @@ def ai_assistant_page():
     with col1:
         send_button = st.button("Send")
     with col2:
-        speak_button = st.button("Speak" if not st.session_state.is_recording else "Stop Speaking")
-    
-    # Toggle recording status when the speak/stop button is clicked
-    if speak_button:
-        st.session_state.is_recording = not st.session_state.is_recording
-    
+        speak_button = st.button("Stop Speaking" if st.session_state.is_recording else "Speak")
+        if speak_button:
+            st.session_state.is_recording = not st.session_state.is_recording
+
     # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
         key="speech-to-text",
@@ -220,22 +218,28 @@ def ai_assistant_page():
         ),
         sendback_audio=False,
         audio_receiver_size=1024,
+        rtc_configuration={"iceServers": [{"urls": ["stun:stun.l.google.com:19302"]}]},
+        media_stream_callback=None,
     )
-    
-    # Process audio frames if recording has stopped
-    if webrtc_ctx.audio_receiver and not st.session_state.is_recording:
+
+    if webrtc_ctx.audio_receiver and st.session_state.is_recording:
         audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
-            transcribed_text = transcribe_audio(audio_data)
-            if transcribed_text:
-                st.session_state.messages.append({"role": "user", "content": transcribed_text})
-                response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
-                st.session_state.messages.append({"role": "assistant", "content": response})
-                st.experimental_rerun()
-            else:
-                st.error("Failed to transcribe audio. Please try again.")
+            st.session_state.audio_buffer = st.session_state.get('audio_buffer', b'') + audio_data
     
+    if not st.session_state.is_recording and st.session_state.get('audio_buffer'):
+        transcribed_text = transcribe_audio(st.session_state.audio_buffer)
+        if transcribed_text:
+            st.session_state.messages.append({"role": "user", "content": transcribed_text})
+            response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+            st.session_state.audio_buffer = b''
+            st.experimental_rerun()
+        else:
+            st.error("Failed to transcribe audio. Please try again.")
+        st.session_state.audio_buffer = b''
+
     if send_button and user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
         response = generate_insurance_assistant_response(user_input, client, fine_tuning_data, fitness_discount_data)
