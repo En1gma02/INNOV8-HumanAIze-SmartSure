@@ -6,9 +6,9 @@ from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 import speech_recognition as sr
 from gtts import gTTS
-import pyaudio
-import wave
 import tempfile
+from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
+import av
 
 # Load environment variables from .env file
 load_dotenv()
@@ -88,10 +88,11 @@ def generate_insurance_assistant_response(prompt_input, client, fine_tuning_data
     return response
 
 # Function to transcribe audio
-def transcribe_audio(audio_file_path):
+def transcribe_audio(audio_data):
     try:
         r = sr.Recognizer()
-        with sr.AudioFile(audio_file_path) as source:
+        audio = sr.AudioFile(io.BytesIO(audio_data))
+        with audio as source:
             audio_data = r.record(source)
         text = r.recognize_google(audio_data)
         return text
@@ -106,43 +107,6 @@ def text_to_speech(text):
     tts.write_to_fp(audio_bytes)
     audio_bytes.seek(0)
     return audio_bytes.getvalue()
-
-# Function to record audio
-def record_audio(device_index, duration=5):
-    CHUNK = 1024
-    FORMAT = pyaudio.paInt16
-    CHANNELS = 1
-    RATE = 44100
-    RECORD_SECONDS = duration
-
-    p = pyaudio.PyAudio()
-
-    stream = p.open(format=FORMAT,
-                    channels=CHANNELS,
-                    rate=RATE,
-                    input=True,
-                    input_device_index=device_index,
-                    frames_per_buffer=CHUNK)
-
-    frames = []
-
-    for i in range(0, int(RATE / CHUNK * RECORD_SECONDS)):
-        data = stream.read(CHUNK)
-        frames.append(data)
-
-    stream.stop_stream()
-    stream.close()
-    p.terminate()
-
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_audio_file:
-        wf = wave.open(temp_audio_file.name, 'wb')
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(p.get_sample_size(FORMAT))
-        wf.setframerate(RATE)
-        wf.writeframes(b''.join(frames))
-        wf.close()
-
-    return temp_audio_file.name
 
 # Define the AI Assistant page
 def ai_assistant_page():
@@ -207,20 +171,6 @@ def ai_assistant_page():
 
         st.button('Clear Chat History', on_click=clear_chat_history)
 
-    # Get available input devices
-    p = pyaudio.PyAudio()
-    input_devices = []
-    for i in range(p.get_device_count()):
-        dev = p.get_device_info_by_index(i)
-        if dev.get('maxInputChannels') > 0:
-            input_devices.append(dev)
-
-    if input_devices:
-        selected_device_index = input_devices[0]['index']
-    else:
-        st.error("No input devices found.")
-        return
-
     # Initialize session state for messages
     if "messages" not in st.session_state:
         st.session_state.messages = [{"role": "assistant", "content": "How may I assist you today?"}]
@@ -251,18 +201,32 @@ def ai_assistant_page():
     with col2:
         speak_button = st.button("Speak")
 
-    if speak_button:
-        st.write("Recording... Speak now.")
-        audio_file_path = record_audio(selected_device_index)
-        transcribed_text = transcribe_audio(audio_file_path)
-        if transcribed_text:
-            st.session_state.messages.append({"role": "user", "content": transcribed_text})
-            response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            os.unlink(audio_file_path)  # Delete the temporary audio file
-            st.experimental_rerun()
-        else:
-            st.error("Failed to transcribe audio. Please try again.")
+    # Use webrtc to record audio
+    webrtc_ctx = webrtc_streamer(
+        key="speech-to-text",
+        mode=WebRtcMode.SENDONLY,
+        client_settings=ClientSettings(
+            media_stream_constraints={
+                "audio": True,
+                "video": False
+            }
+        ),
+        sendback_audio=False,
+        audio_receiver_size=1024,
+    )
+
+    if webrtc_ctx.audio_receiver:
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
+        if audio_frames:
+            audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
+            transcribed_text = transcribe_audio(audio_data)
+            if transcribed_text:
+                st.session_state.messages.append({"role": "user", "content": transcribed_text})
+                response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.experimental_rerun()
+            else:
+                st.error("Failed to transcribe audio. Please try again.")
 
     if send_button and user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
