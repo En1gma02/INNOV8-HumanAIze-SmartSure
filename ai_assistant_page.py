@@ -204,6 +204,10 @@ def ai_assistant_page():
     with col2:
         speak_button = st.button("Speak" if not st.session_state.is_recording else "Stop Speaking")
     
+    # Toggle recording status when the speak/stop button is clicked
+    if speak_button:
+        st.session_state.is_recording = not st.session_state.is_recording
+    
     # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
         key="speech-to-text",
@@ -218,13 +222,9 @@ def ai_assistant_page():
         audio_receiver_size=1024,
     )
     
-    # Toggle recording status when the speak/stop button is clicked
-    if speak_button:
-        st.session_state.is_recording = not st.session_state.is_recording
-    
     # Process audio frames if recording has stopped
     if webrtc_ctx.audio_receiver and not st.session_state.is_recording:
-        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=10)
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
         if audio_frames:
             audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
             transcribed_text = transcribe_audio(audio_data)
