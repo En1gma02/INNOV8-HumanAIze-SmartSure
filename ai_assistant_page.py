@@ -9,7 +9,6 @@ from gtts import gTTS
 import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
-from io import BytesIO
 
 # Load environment variables from .env file
 load_dotenv()
@@ -56,19 +55,6 @@ def predict_discount(fitness_score):
     else:
         return 0   # No discount
 
-def record_audio(duration, sample_rate=44100):
-    recording = sd.rec(int(duration * sample_rate), samplerate=sample_rate, channels=1)
-    sd.wait()
-    return recording
-
-def save_audio(recording, filename, sample_rate=44100):
-    wf = wave.open(filename, 'wb')
-    wf.setnchannels(1)
-    wf.setsampwidth(2)
-    wf.setframerate(sample_rate)
-    wf.writeframes((recording * 32767).astype(np.int16).tobytes())
-    wf.close()
-
 # Function to generate AI assistant response
 def generate_insurance_assistant_response(prompt_input, client, fine_tuning_data, fitness_discount_data):
     system_message = "You are a consultant with expertise in personal finance and insurance. Provide crisp and short responses."
@@ -102,10 +88,11 @@ def generate_insurance_assistant_response(prompt_input, client, fine_tuning_data
     return response
 
 # Function to transcribe audio
-def transcribe_audio(audio_file_path):
+def transcribe_audio(audio_data):
     try:
         r = sr.Recognizer()
-        with sr.AudioFile(audio_file_path) as source:
+        audio = sr.AudioFile(io.BytesIO(audio_data))
+        with audio as source:
             audio_data = r.record(source)
         text = r.recognize_google(audio_data)
         return text
@@ -126,9 +113,6 @@ def ai_assistant_page():
     st.title('AI Assistant')
     st.write("Your personal insurance and finance expert")
 
-    if "is_recording" not in st.session_state:
-        st.session_state.is_recording = False
-    
     # Custom CSS for chat containers and buttons
     st.markdown("""
     <style>
@@ -210,38 +194,39 @@ def ai_assistant_page():
                     st.audio(audio_bytes, format="audio/mp3")
 
     # Handle user input and generate responses
+    user_input = st.text_input("Type your message here:", key="user_input")
     col1, col2 = st.columns([0.5, 0.5])
     with col1:
         send_button = st.button("Send")
     with col2:
-        audio_bytes = st.audio_recorder(key="audio_recorder")
-    
-    if audio_bytes:
-        st.audio(audio_bytes, format="audio/wav")
-        
-        # Save audio bytes to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
-            tmp_file.write(audio_bytes)
-            tmp_file_path = tmp_file.name
-    
-        # Transcribe the audio
-        transcribed_text = transcribe_audio(tmp_file_path)
-        
-        if transcribed_text:
-            st.write(f"Transcribed text: {transcribed_text}")
-            st.session_state.messages.append({"role": "user", "content": transcribed_text})
-            response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-        else:
-            st.error("Failed to transcribe audio. Please try again.")
-        
-        # Clean up the temporary file
-        os.unlink(tmp_file_path)
-        
-        st.experimental_rerun()
+        speak_button = st.button("Speak")
 
-    if st.session_state.get('is_recording', False):
-        st.write("Recording in progress...")
+    # Use webrtc to record audio
+    webrtc_ctx = webrtc_streamer(
+        key="speech-to-text",
+        mode=WebRtcMode.SENDONLY,
+        client_settings=ClientSettings(
+            media_stream_constraints={
+                "audio": True,
+                "video": False
+            }
+        ),
+        sendback_audio=False,
+        audio_receiver_size=1024,
+    )
+
+    if webrtc_ctx.audio_receiver:
+        audio_frames = webrtc_ctx.audio_receiver.get_frames(timeout=1)
+        if audio_frames:
+            audio_data = b"".join([af.to_ndarray().tobytes() for af in audio_frames])
+            transcribed_text = transcribe_audio(audio_data)
+            if transcribed_text:
+                st.session_state.messages.append({"role": "user", "content": transcribed_text})
+                response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.experimental_rerun()
+            else:
+                st.error("Failed to transcribe audio. Please try again.")
 
     if send_button and user_input:
         st.session_state.messages.append({"role": "user", "content": user_input})
