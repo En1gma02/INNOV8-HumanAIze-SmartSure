@@ -37,4 +37,4 @@ deprecation
 pyttsx3==2.90
 pyaudio==0.2.14
 streamlit-webrtc
-sounddevice
+audio_recorder_streamlit
