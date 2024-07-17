@@ -9,9 +9,7 @@ from gtts import gTTS
 import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
-import sounddevice as sd
-import numpy as np
-import wave
+from io import BytesIO
 
 # Load environment variables from .env file
 load_dotenv()
@@ -216,28 +214,31 @@ def ai_assistant_page():
     with col1:
         send_button = st.button("Send")
     with col2:
-        speak_button = st.button("Start Recording" if not st.session_state.get('is_recording', False) else "Stop Recording")
+        audio_bytes = st.audio_recorder(key="audio_recorder")
     
-    if speak_button:
-        if not st.session_state.get('is_recording', False):
-            st.session_state.is_recording = True
-            st.session_state.audio_data = record_audio(5)  # Record for 5 seconds
-            st.experimental_rerun()
+    if audio_bytes:
+        st.audio(audio_bytes, format="audio/wav")
+        
+        # Save audio bytes to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
+            tmp_file.write(audio_bytes)
+            tmp_file_path = tmp_file.name
+    
+        # Transcribe the audio
+        transcribed_text = transcribe_audio(tmp_file_path)
+        
+        if transcribed_text:
+            st.write(f"Transcribed text: {transcribed_text}")
+            st.session_state.messages.append({"role": "user", "content": transcribed_text})
+            response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
+            st.session_state.messages.append({"role": "assistant", "content": response})
         else:
-            st.session_state.is_recording = False
-            if st.session_state.get('audio_data') is not None:
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_file:
-                    save_audio(st.session_state.audio_data, tmp_file.name)
-                    transcribed_text = transcribe_audio(tmp_file.name)
-                    if transcribed_text:
-                        st.session_state.messages.append({"role": "user", "content": transcribed_text})
-                        response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
-                        st.session_state.messages.append({"role": "assistant", "content": response})
-                    else:
-                        st.error("Failed to transcribe audio. Please try again.")
-                os.unlink(tmp_file.name)
-            st.session_state.audio_data = None
-            st.experimental_rerun()
+            st.error("Failed to transcribe audio. Please try again.")
+        
+        # Clean up the temporary file
+        os.unlink(tmp_file_path)
+        
+        st.experimental_rerun()
 
     if st.session_state.get('is_recording', False):
         st.write("Recording in progress...")
