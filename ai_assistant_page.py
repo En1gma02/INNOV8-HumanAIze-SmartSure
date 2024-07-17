@@ -217,7 +217,7 @@ def ai_assistant_page():
         speak_button = st.button("Speak")
 
   
-    uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
+    uploaded_file = st.file_uploader("Facing issues recording? Upload an audio file instead:", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
 
     if uploaded_file is not None and not st.session_state.file_processed:
         try:
@@ -245,9 +245,6 @@ def ai_assistant_page():
 
     if st.button("New audio"):
         st.session_state.file_processed = False
-            
-    # Add this text below the buttons
-    st.write("Facing issues recording? Upload an audio file instead.")
     
     # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
