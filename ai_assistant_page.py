@@ -271,4 +271,4 @@ def ai_assistant_page():
 
 # Run the app
 if __name__ == "__main__":
-    ai_assistant_page()
+    ai_assist9ant_page()
