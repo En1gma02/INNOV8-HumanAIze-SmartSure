@@ -9,6 +9,7 @@ from gtts import gTTS
 import tempfile
 from streamlit_webrtc import webrtc_streamer, WebRtcMode, ClientSettings
 import av
+from pydub import AudioSegment
 
 # Load environment variables from .env file
 load_dotenv()
@@ -91,16 +92,24 @@ def generate_insurance_assistant_response(prompt_input, client, fine_tuning_data
 def transcribe_audio(audio_data):
     try:
         r = sr.Recognizer()
+        
+        # Convert audio to WAV
         if isinstance(audio_data, bytes):
-            audio = sr.AudioFile(io.BytesIO(audio_data))
+            audio = AudioSegment.from_file(io.BytesIO(audio_data))
         else:
-            audio = sr.AudioFile(audio_data)
-        with audio as source:
+            audio = AudioSegment.from_file(audio_data)
+        
+        wav_data = io.BytesIO()
+        audio.export(wav_data, format="wav")
+        wav_data.seek(0)
+        
+        with sr.AudioFile(wav_data) as source:
             audio_data = r.record(source)
+        
         text = r.recognize_google(audio_data)
         return text
     except Exception as e:
-        st.error(f"Error transcribing audio: {e}")
+        st.error(f"Error transcribing audio: {str(e)}")
         return None
 
 # Function to convert text to speech
@@ -197,35 +206,38 @@ def ai_assistant_page():
                     st.audio(audio_bytes, format="audio/mp3")
 
     # Handle user input and generate responses
-    col1, col2, col3 = st.columns([0.33, 0.33, 0.33])
+    col1, col2= st.columns([0.5, 0.5])
     with col1:
         send_button = st.button("Send")
     with col2:
         speak_button = st.button("Speak")
-    with col3:
-        uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3'])
+  
+    uploaded_file = st.file_uploader("Upload audio", type=['wav', 'mp3', 'ogg', 'm4a', 'flac'])
 
     # Add this text below the buttons
     st.write("Facing issues recording? Upload an audio file instead.")
 
     if uploaded_file is not None:
-        # Display audio player
-        st.audio(uploaded_file, format="audio/wav")
-        
-        # Read the file
-        audio_bytes = uploaded_file.read()
-        
-        # Transcribe the audio
-        transcribed_text = transcribe_audio(audio_bytes)
-        
-        if transcribed_text:
-            st.write(f"Transcribed text: {transcribed_text}")
-            st.session_state.messages.append({"role": "user", "content": transcribed_text})
-            response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-            st.experimental_rerun()
-        else:
-            st.error("Failed to transcribe audio. Please try again.")
+        try:
+            # Display audio player
+            st.audio(uploaded_file)
+            
+            # Read the file
+            audio_bytes = uploaded_file.read()
+            
+            # Transcribe the audio
+            transcribed_text = transcribe_audio(audio_bytes)
+            
+            if transcribed_text:
+                st.write(f"Transcribed text: {transcribed_text}")
+                st.session_state.messages.append({"role": "user", "content": transcribed_text})
+                response = generate_insurance_assistant_response(transcribed_text, client, fine_tuning_data, fitness_discount_data)
+                st.session_state.messages.append({"role": "assistant", "content": response})
+                st.experimental_rerun()
+            else:
+                st.error("Failed to transcribe audio. Please try again with a different file.")
+        except Exception as e:
+            st.error(f"Error processing audio file: {str(e)}")
         
     # Use webrtc to record audio
     webrtc_ctx = webrtc_streamer(
