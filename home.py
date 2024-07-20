@@ -55,12 +55,10 @@ def home_page():
                 margin: 20px 0;
             }
             .image-container {
-                text-align: center;
+                display: flex;
+                justify-content: center;
+                gap: 20px;
                 margin-bottom: 20px;
-            }
-            .image-container img {
-                max-width: 100%;
-                height: auto;
             }
         </style>
     """
@@ -70,7 +68,15 @@ def home_page():
     st.markdown("<h1 class='dashboard-title'>Welcome to the Insurance Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("<p class='team-name'>Developed by Team Innov8</p>", unsafe_allow_html=True)
 
-    st.markdown("<div class='image-container'><img src='ring.jpg' alt='Fitness Tracker'></div>", unsafe_allow_html=True)
+    # Use st.image to display images side by side
+    image_urls = [
+        'https://raw.githubusercontent.com/buddhadevyash/INNOV8-HumanAIze-FintechEdition/blob/main/watch.png',
+        'https://raw.githubusercontent.com/buddhadevyash/INNOV8-HumanAIze-FintechEdition/blob/main/ring.jpg'
+    ]
+    st.markdown("<div class='image-container'>", unsafe_allow_html=True)
+    st.image(image_urls, width=300, caption=["Fitness Band", "Fitness Ring"])
+    st.markdown("</div>", unsafe_allow_html=True)
+    
     st.markdown("<p class='motto'>We provide custom insurance plans, discounts, and financial advice based on your overall and monthly fitness scores, empowered by our custom AI model and statistical algorithms.</p>", unsafe_allow_html=True)
 
     st.markdown("<p class='dashboard-text'>You can perform the following actions here:</p>", unsafe_allow_html=True)
