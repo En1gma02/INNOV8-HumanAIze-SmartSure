@@ -51,7 +51,7 @@ def home_page():
             .motto {
                 font-size: 20px;
                 color: #ffa500; /* Orange color for the motto */
-                text-align: center;
+                text-align: left;
                 margin: 20px 0;
             }
         </style>
