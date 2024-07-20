@@ -55,14 +55,13 @@ def home_page():
                 margin: 20px 0;
             }
             .image-container {
-                display: block;
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 gap: 20px;
                 margin-bottom: 20px;
-                margin-left: auto;
-                margin-right: auto;
-                width: 50%;
+                padding-right: 50px;
+                padding-left: 50px;
             }
         </style>
     """
