@@ -70,7 +70,7 @@ def home_page():
     st.markdown("<h1 class='dashboard-title'>Welcome to the Insurance Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("<p class='team-name'>Developed by Team Innov8</p>", unsafe_allow_html=True)
 
-    st.markdown("<div class='image-container'><img src='watch.jpg' alt='Fitness Tracker'></div>", unsafe_allow_html=True)
+    st.markdown("<div class='image-container'><img src='watch.png' alt='Fitness Tracker'></div>", unsafe_allow_html=True)
     st.markdown("<p class='motto'>We provide custom insurance plans, discounts, and financial advice based on your overall and monthly fitness scores, empowered by our custom AI model and statistical algorithms.</p>", unsafe_allow_html=True)
 
     st.markdown("<p class='dashboard-text'>You can perform the following actions here:</p>", unsafe_allow_html=True)
