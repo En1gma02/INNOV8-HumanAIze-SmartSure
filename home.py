@@ -69,9 +69,12 @@ def home_page():
     st.markdown("<h1 class='dashboard-title'>Welcome to the Insurance Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("<p class='team-name'>Developed by Team Innov8</p>", unsafe_allow_html=True)
 
-    # Display images side by side
+    # Use raw URLs for images
     st.markdown("<div class='image-container'>", unsafe_allow_html=True)
-    st.image(['/mnt/data/watch.png', '/mnt/data/insurance.jpg', '/mnt/data/ring.jpg'], width=200, caption=["Fitness Band", "Insurance", "Fitness Ring"])
+    st.image(['https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/watch.png',
+              'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/insurance.png',
+              'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/ring.jpg'],
+             width=200, caption=["Fitness Band", "Insurance", "Fitness Ring"])
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("<p class='motto'>Our AI-driven platform provides personalized insurance plans, exclusive discounts, and expert financial advice, all based on your comprehensive fitness scores tracked monthly.</p>", unsafe_allow_html=True)
