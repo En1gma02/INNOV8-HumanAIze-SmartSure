@@ -60,6 +60,10 @@ def home_page():
                 align-items: center;
                 gap: 20px;
                 margin-bottom: 20px;
+                margin-left: auto;
+                margin-right: auto;
+                width: 50%;
+                height: 200px;
             }
         </style>
     """
@@ -74,10 +78,10 @@ def home_page():
     st.image(['https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/watch.png',
               'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/insurance.png',
               'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/ring.jpg'],
-             width=200, caption=["Fitness Band", "Insurance", "Fitness Ring"])
+             width=200, caption=["Fitness Band", "", "Fitness Ring"])
     st.markdown("</div>", unsafe_allow_html=True)
     
-    st.markdown("<p class='motto'>Our AI-driven platform provides personalized insurance plans, exclusive discounts, and expert financial advice, all based on your comprehensive fitness scores tracked monthly.</p>", unsafe_allow_html=True)
+    st.markdown("<p class='motto'>Our AI-driven platform provides personalized insurance plans, exclusive discounts, and expert financial advice, all based on your comprehensive fitness scores tracked monthly. Now get rewarded for maintaining a healthy lifestyle with SmartSure.</p>", unsafe_allow_html=True)
 
     st.markdown("<p class='dashboard-text'>You can perform the following actions here:</p>", unsafe_allow_html=True)
     st.markdown("""
