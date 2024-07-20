@@ -55,7 +55,7 @@ def home_page():
                 margin: 20px 0;
             }
             .image-container {
-                display: flex;
+                display: block;
                 justify-content: center;
                 align-items: center;
                 gap: 20px;
@@ -63,7 +63,6 @@ def home_page():
                 margin-left: auto;
                 margin-right: auto;
                 width: 50%;
-                height: 200px;
             }
         </style>
     """
