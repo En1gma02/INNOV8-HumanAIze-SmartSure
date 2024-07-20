@@ -33,7 +33,7 @@ def home_page():
             }
             .action-list {
                 font-size: 22px;
-                color: #64ffda; /* Light teal for action items */
+                color: #a4d8d8; /* Light teal for action items */
                 margin-bottom: 20px;
                 list-style-type: none;
                 padding-left: 0;
