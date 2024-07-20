@@ -60,8 +60,10 @@ def home_page():
                 align-items: center;
                 gap: 20px;
                 margin-bottom: 20px;
-                padding-right: 50px;
-                padding-left: 50px;
+                margin-left: auto;
+                margin-right: auto;
+                padding-right: 100px;
+                padding-left: 100px;
             }
         </style>
     """
@@ -76,7 +78,7 @@ def home_page():
     st.image(['https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/watch.png',
               'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/insurance.png',
               'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/ring.jpg'],
-             width=200, caption=["Fitness Band", "", "Fitness Ring"])
+              caption=["Fitness Band", "", "Fitness Ring"])
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("<p class='motto'>Our AI-driven platform provides personalized insurance plans, exclusive discounts, and expert financial advice, all based on your comprehensive fitness scores tracked monthly. Now get rewarded for maintaining a healthy lifestyle with SmartSure.</p>", unsafe_allow_html=True)
