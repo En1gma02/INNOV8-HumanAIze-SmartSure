@@ -70,8 +70,8 @@ def home_page():
 
     # Use st.image to display images side by side
     image_urls = [
-        'https://raw.githubusercontent.com/buddhadevyash/INNOV8-HumanAIze-FintechEdition/blob/main/watch.png',
-        'https://raw.githubusercontent.com/buddhadevyash/INNOV8-HumanAIze-FintechEdition/blob/main/ring.jpg'
+        'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/watch.png',
+        'https://raw.githubusercontent.com/En1gma02/INNOV8-HumanAIze-SmartSure/main/ring.jpg'
     ]
     st.markdown("<div class='image-container'>", unsafe_allow_html=True)
     st.image(image_urls, width=300, caption=["Fitness Band", "Fitness Ring"])
