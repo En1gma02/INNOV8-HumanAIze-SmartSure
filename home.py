@@ -1,5 +1,3 @@
-# home.py
-
 import streamlit as st
 
 def home_page():
@@ -50,6 +48,20 @@ def home_page():
                 color: #8892b0; /* Light blue-grey text for footer */
                 text-align: center;
             }
+            .motto {
+                font-size: 20px;
+                color: #ffa500; /* Orange color for the motto */
+                text-align: center;
+                margin: 20px 0;
+            }
+            .image-container {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .image-container img {
+                max-width: 100%;
+                height: auto;
+            }
         </style>
     """
     
@@ -57,7 +69,10 @@ def home_page():
 
     st.markdown("<h1 class='dashboard-title'>Welcome to the Insurance Dashboard</h1>", unsafe_allow_html=True)
     st.markdown("<p class='team-name'>Developed by Team Innov8</p>", unsafe_allow_html=True)
-    
+
+    st.markdown("<div class='image-container'><img src='watch.jpg' alt='Fitness Tracker'></div>", unsafe_allow_html=True)
+    st.markdown("<p class='motto'>We provide custom insurance plans, discounts, and financial advice based on your overall and monthly fitness scores, empowered by our custom AI model and statistical algorithms.</p>", unsafe_allow_html=True)
+
     st.markdown("<p class='dashboard-text'>You can perform the following actions here:</p>", unsafe_allow_html=True)
     st.markdown("""
     <ul class='action-list'>
@@ -67,8 +82,11 @@ def home_page():
         <li>Make Your Own Custom Insurance Plan</li>
     </ul>
     """, unsafe_allow_html=True)
-    
+
     st.markdown("<p class='dashboard-text'>Select a page from the sidebar to get started!</p>", unsafe_allow_html=True)
 
     st.markdown("---")
     st.markdown("<p class='footer'>Made with ☕ and 💻 by Harsh, Vatsal, Yash & Akshansh</p>", unsafe_allow_html=True)
+
+if __name__ == "__main__":
+    home_page()
