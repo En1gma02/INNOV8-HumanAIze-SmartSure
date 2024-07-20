@@ -58,10 +58,8 @@ def home_page():
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                gap: 20px;
+                gap: 100px;
                 margin-bottom: 20px;
-                margin-left: auto;
-                margin-right: auto;
                 padding-right: 100px;
                 padding-left: 100px;
             }
